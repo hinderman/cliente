@@ -12,6 +12,8 @@ const SearchFlights = () => {
         departureDate: ""
     });
     
+  const [flights, setFlights] = useState([]);
+    
   const [error, setError] = useState("");
 
   const handleChange = ({ currentTarget: input }) => {
@@ -19,12 +21,19 @@ const SearchFlights = () => {
 	};
 
   const handleSubmit = async (e) => {
-    console.log(e);
 		e.preventDefault();
 		try {
-			const url = "";
-			const { data: res } = await axios.post(url, data);
-			window.location = "/";
+      data.departureDate.toString("yyyy-MM-dd");
+      const url = "http://localhost:8081/api/flight/getFlightByFilters";
+      const token = localStorage.getItem('accessToken');
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: data
+      };
+      const response = await axios.get(url, config);
+      setFlights(response.data);
 		} catch (error) {
 			if (error.response && error.response.status >= 400 && error.response.status <= 500) {
 				setError(error.response.data.message);
@@ -34,7 +43,6 @@ const SearchFlights = () => {
 	};
   
   return (
-		<div className={styles.searchFlights_container}>
 			<div className={styles.searchFlights_form_container}>
 				<div className={styles.left}>
 					<h1>Search Flights</h1>
@@ -98,11 +106,26 @@ const SearchFlights = () => {
 				</div>
 
 				<div className={styles.right}>
-
-				</div>
+          <table className={styles.flight_table}>
+            <thead>
+              <tr>
+                <th>Departure Airport</th>
+                <th>Arrival Airport</th>
+                <th>Departure Date</th>
+              </tr>
+            </thead>
+            <tbody>{flights.map((flight, index) => (
+              <tr key={index}>
+                <td>{flight.departureAirportName}</td>
+                <td>{flight.arrivalAirportName}</td>
+                <td>{flight.departureDate}</td>
+              </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
 			</div>
-		</div>
 	);
 };
 export default SearchFlights;
